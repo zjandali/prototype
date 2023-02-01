@@ -1,0 +1,87 @@
+html, body {
+    height: 100vh;
+    font-family: 'Ubuntu', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+h3 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.error{
+    color: #f55c47;
+    text-align: left;
+}
+
+.container {
+    width: 100%
+}
+
+.form-signin .header {
+    text-align: center;
+}
+
+.form-signin .logo {
+    width:25%;
+    text-align: center;
+}
+
+.form-signin .checkbox {
+    font-weight: 400;
+    text-align: left;
+}
+
+.form-signin .form-floating:focus-within {
+    z-index: 2;
+}
+
+.form-signin input[type="text"] {
+    margin-bottom: -1px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.form-signin input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.form-signin .form-login {
+    margin-top: 5%;
+    text-align: left;
+}
+
+
+.or {
+    position: relative;
+    color: #aaa;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+    .span-or {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    margin-left: -25px;
+    background-color: #fff;
+    width: 50px;
+    text-align: center;
+}
+.hr-or {
+    height: 1px;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}

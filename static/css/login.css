@@ -1,0 +1,67 @@
+html, body {
+    height: 100vh;
+    font-family: 'Ubuntu', sans-serif;
+  }
+
+h3 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.error{
+    color: #f55c47;
+}
+
+.container-fluid {
+    margin: 0;
+    padding: 0
+}
+
+.container-row1 {
+    background-color: #dbe2ef;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+
+.container-row2 {
+    padding: 10%;
+    height: 100vh;
+}
+
+
+.container-row1 .pic {
+    width: 80%;
+}
+
+
+.form-signin .header {
+    text-align: center;
+}
+
+.form-signin .logo {
+    width: 25%;
+    text-align: center;
+}
+
+.form-signin .checkbox {
+    font-weight: 400;
+}
+
+.form-signin .form-floating:focus-within {
+    z-index: 2;
+}
+
+.form-signin input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}

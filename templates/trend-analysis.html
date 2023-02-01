@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trend Analysis</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/trend-analysis.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" type="text/css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
+
+</head>
+<body>
+    {% extends "template.html" %}
+    {% block content %}
+
+    <!-- Tab links -->
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'step1-content')" id="step1-btn">Step 1: User Input</button>
+        <button class="tablinks" onclick="openTab(event, 'step2-content')" id="step2-btn">Step 2: Preliminary Findings</button>
+        <button class="tablinks" onclick="openTab(event, 'step3-content')" id="step3-btn">Step 3: Full Analytical Report</button>
+    </div>
+
+    <!-- Input: Filter/User Selector-->
+    <div id="step1-content" class="tabcontent">
+        <h2>Step 1: pick the hashtag and time range you want to listen on</h2>
+        <section id="intro">
+            {% if input_values[3] %}
+                <span class="error">Error: {{ input_values[3] }}</span>
+            {% endif %}
+            <span id="inputError"></span>
+            <form class="form-inline", method="POST", action="/dashboard/trend-analysis" onsubmit="return timeErrorMessage(this)">
+                <label class="my-1 mr-2">Which Keyword/hashtag do you want to listen on? </label>
+                <select class="custom-select" id="keyword-selector" name="keyword-selector" required>   
+                    {% for i in input_values[0] %}
+                        <option value={{i}}>#{{i}}</option>
+                    {% endfor %}
+                </select><br>
+                <label>Which time range do you want to choose? </label>
+                <select class="custom-select" id="timerange-selector" name="timerange-selector" required>
+                    <option value="past-week">Past Week</option>
+                    <option value="past-month">Past Month</option>
+                    <option value="past-year">Past Year</option>
+                    <option value="customized-time">Customized</option>
+                </select>
+                <div id="customizedtime-div">
+                    <label>From</label>
+                    <input type="date" id="from-date" name="from-date" min={{input_values[1]}} max={{input_values[2]}}>
+                    <label>-->To</label>
+                    <input type="date" id="to-date" name="to-date" min={{input_values[1]}} max={{input_values[2]}}>
+                </div>
+                <button type="submit" class="btn btn-primary my-1 btn-sm" id="sumbit" >Submit</button>
+                <hr>
+                <span>Desired hashtag or time range is not found? Tell us <a href="#">here</a>.</span><br>
+                <span>Don't know what to expect? A sample case is prepared in <a href="#" class="step2-trigger">step 2</a>!</span>
+            </form>
+        <section class="foot-section">
+            <i class="fas fa-arrow-left fa-3x hidden"></i>
+            <a href="#" class="step2-trigger"><i class="fas fa-arrow-right fa-3x"></i></a>
+        </section>
+        </section>
+    </div>
+
+
+
+
+
+
+    <!-- Recommendations -->
+    <div id="step2-content" class="tabcontent">
+        <!-- Input: Filter/User Selector-->
+        <h2>Step 2: get updated with our latest findings/recommendations</h2>
+        {% if intro[4] %}
+                <img src="{{ url_for('static', filename='pics/sample.png') }}" alt="sample" class="sample">
+        {% endif %}
+        <div class="report">
+            <section>
+                <div class="advice"><p>There are <strong>{{intro[0]}}</strong> tweets containing keyword <strong>#{{intro[1]}}</strong> collected from <strong>{{intro[2]}}</strong> to <strong>{{intro[3]}}</strong> (included). Prelimianry findings are produced below to quickly update you on what was going on from {{intro[2]}} to {{intro[3]}} in the topic of #{{intro[1]}}.</p></div>
+            </section>
+            <section>
+                <div class="advice"><img src=" {{ url_for('static', filename='pics/one.png') }}" alt="one" class="indicators"> The peak of #{{intro[1]}} from {{intro[2]}} to {{intro[3]}} is on <strong>{{plotTrend[2][0]}}</strong> with as high as <strong>{{plotTrend[2][1]}}</strong> tweets. On {{plotTrend[2][2]}}, the hottest tweet gained {{plotTrend[2][3]}} likes. Top 3 tweets related to #{{intro[1]}} from {{intro[2]}} to {{intro[3]}} are diplayed below. The post from <strong>@{{topTweet[0][1]}}</strong> gained <strong>{{topTweet[0][2]}}</strong> likes, followed by {{topTweet[1][2]}} (<strong>@{{topTweet[1][1]}}</strong>) and {{topTweet[2][2]}} (<strong>@{{topTweet[2][1]}}</strong>).</div>
+                <div class="container-fluid row">
+                    {% for i in topTweet %}
+                        <div class="col-lg-4 col-md-6 col-sm-12">
+                            <blockquote class="twitter-tweet"><a href={{i[0]}}></a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+            <section>
+                <div class="advice">
+                    <p style="display:inline"><img src=" {{ url_for('static', filename='pics/two.png') }}" alt="two" class="indicators"> The most related hashtags to the topic #{{intro[1]}} from {{intro[2]}} to {{intro[3]}} are:  
+                        {% for i in range(5) %}
+                                <p class="list-p" style="display:inline-block"><strong>#{{plotHashtag[1][i]}}</strong> ({{plotHashtag[2][i]}} times/{{intro[0]}} tweets)</p>
+                        {% endfor %}
+                    </p>
+                </div>
+                <div id ="hashtagNetwork" class="plotly-analysis col-lg-12 col-md-12"></div>
+                <script>
+                    // initialize global variables.
+                    var edges;
+                    var nodes;
+                    var network; 
+                    var container;
+                    var options, data;
+                    
+                    // This method is responsible for drawing the graph, returns the drawn network
+                    function drawGraph() {
+                        var container = document.getElementById('hashtagNetwork');
+                        nodes = new vis.DataSet();
+                        edges = new vis.DataSet();
+                        
+                        // parsing and collecting nodes and edges from the python
+                        for (const i of {{plotNx[0]|safe}}){
+                            nodes.add(JSON.parse(i))
+                        };
+                
+                        for (const j of {{plotNx[1]|safe}}){
+                            edges.add(JSON.parse(j))
+                        };
+                        
+                        // adding nodes and edges to the graph
+                        data = {nodes: nodes, edges: edges};
+                
+                        var options = {
+                                    'autoResize': true,
+                                    "configure": {
+                                        "enabled": false
+                                    },
+                                    "edges": {
+                                        "color": {
+                                            "inherit": true
+                                        },
+                                        "smooth": {
+                                            "enabled": false,
+                                            "type": "continuous"
+                                        }
+                                    },
+                                    "interaction": {
+                                        "dragNodes": true,
+                                        "hideEdgesOnDrag": false,
+                                        "hideNodesOnDrag": false
+                                    },
+                                    "physics": {    
+                                        'enabled': false,
+                                        'stabilization': {
+                                            'enabled': true,
+                                            "fit": true,
+                                            "iterations": 1000,
+                                            "onlyDynamicEdges": false,
+                                            "updateInterval": 50
+                                        }
+                                    },
+                                    "groups": {
+                                        "top3": {
+                                            'color': {
+                                            'border': '#f55c47',
+                                            'background': '#f55c47',
+                                            'highlight': {
+                                                'border': '#f55c47',
+                                                'background': '#f55c47'
+                                                }
+                                            },
+                                            'fontSize': 18
+                                        }
+                                        },
+                                };
+                        network = new vis.Network(container, data, options);
+                        network.moveTo({
+                                        position: {x: 0, y: 0},
+                                        offset: {x: 250, y: 250},
+                                        scale: 1,
+                                    })
+                        return network; 
+                    };
+                    drawGraph();
+                </script>
+            </section>
+            <section>
+                <div class="advice">
+                    <p style="display:inline"><img src=" {{ url_for('static', filename='pics/three.png') }}" alt="three" class="indicators"> Words that are used the most are (top 10):   
+                        {% for i in range(10) %}
+                                <p class="list-p" style="display:inline-block"><strong>{{plotWordCloud[1][i]}}</strong></p>
+                        {% endfor %}
+                    </p>
+                </div>
+            </section>
+            <section>
+                <div class="advice">
+                    <p style="display:inline"><img src=" {{ url_for('static', filename='pics/four.png') }}" alt="four" class="indicators"> Emoji that are used the most are (top 15):   
+                        {% for i in range(15) %}
+                            <p class="list-p" style="display:inline-block"><strong>{{plotEmoji[1][i]}}</strong></p>
+                        {% endfor %}
+                    </p>
+                </div>
+            </section>
+            <section>
+                <div class="advice">
+                    <p style="display:inline"> <img src=" {{ url_for('static', filename='pics/five.png') }}" alt="five" class="indicators"> Top domains (media) that Twitter users link to are:
+                        {% for i in plotDomain[1][:3] %}
+                            <p class="list-p" style="display:inline"><strong>{{i}}</strong></p>
+                        {% endfor %} - Check out the trending media referenced:
+                        {% for i in range(3) %}
+                            <p style="display:inline"><a href="{{plotUrl[1][i]}}" class="link"><i class="fas fa-link"></i>Top {{i+1}}</a> </p>
+                        {% endfor %}
+                    </p>
+                </div>
+            </section>
+            <section>
+                <div class="advice">
+                    <p style="display:inline"> <img src=" {{ url_for('static', filename='pics/six.png') }}" alt="six" class="indicators"> The most mentioned users on Twitter are:
+                        {% for i in plotMention[1][:5] %}
+                            <p class="list-p" style="display:inline"><strong>@{{i}}</strong></p>
+                        {% endfor %} - Check out more analysis on influencers around this topic <a href="/dashboard/influencer-analysis" class="link"> here!</a>
+                    </p>
+                </div>
+            </section>
+            <section>
+                <div class="advice">
+                    <p> [7] Here is a hashtag tree of the top 10 hashtags related to <strong>#{{intro[1]}}</strong> </p>
+                    <a href="/createHashtagTree"> click here </a>
+                </div>
+            </section>
+            <section class="foot-section">
+                <a href="#" class="step1-trigger"><i class="fas fa-arrow-left fa-3x"></i></a>
+                <a href="#" class="step3-trigger"><i class="fas fa-arrow-right fa-3x"></i></a>
+            </section>
+        </div>
+    </div>
+
+    
+
+
+
+
+
+
+
+
+
+    <!-- Output -->
+    <div id="step3-content" class="tabcontent">
+        <!-- Output0: Start with an intro -->
+        <h2>Step 3: follow the guidance to embed analysis into your social media campaign</h2>
+        {% if intro[4] %}
+                <img src="{{ url_for('static', filename='pics/sample.png') }}" alt="sample" class="sample">
+        {% endif %}
+        <section id="stats">
+            <div class="advice"><p>There are <strong>{{intro[0]}}</strong> tweets containing keyword <strong>#{{intro[1]}}</strong> collected from <strong>{{intro[2]}}</strong> to <strong>{{intro[3]}}</strong> (included). The full analytical report is divided into 5 sections. Check the report below!</p></div>
+        </section>
+
+        <!-- Output1: top 3 liked tweets -->
+        <section id="popular-tweets">
+            <a href="#top3Tweets" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="top3Tweets" class="text-decoration-none">
+                <div class="subtitle"><span class="step-guide"> Ⅰ. Keep abreast of the hottest tweets</span><i class="fas fa-chevron-down fa-2x"></i></div>
+            </a>
+            <div id="top3Tweets" class="card card-body collapse">
+                <div class="advice"><p>The tweets below are the <u>top 3 most liked tweets</u> related to #{{intro[1]}} from {{intro[2]}} to {{intro[3]}}. The post from <strong>@{{topTweet[0][1]}}</strong> gained <strong>{{topTweet[0][2]}}</strong> likes, followed by {{topTweet[1][2]}} (<strong>@{{topTweet[1][1]}}</strong>) and {{topTweet[2][2]}} (<strong>@{{topTweet[2][1]}}</strong>). <u>Be sure to keep updated and engaged!</u></p></div>
+                <div class="container-fluid row">
+                    {% for i in topTweet %}
+                        <div class="col-lg-4 col-md-6 col-sm-12">
+                            <blockquote class="twitter-tweet"><a href={{i[0]}}></a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Output2: trends -->
+        <section id="topical-trend">
+            <a href="#trends" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="trends" class="text-decoration-none">
+                <div class="subtitle"><span class="step-guide"> Ⅱ. Gain a broader view of the topical trends</span><i class="fas fa-chevron-down fa-2x"></i></div>
+            </a>
+            <div id="trends" class="card card-body collapse">
+                <div class="container-fluid row">
+                    <div class="advice"><p>The peak of #{{intro[1]}} from {{intro[2]}} to {{intro[3]}} is on <strong>{{plotTrend[2][0]}}</strong> with as high as <strong>{{plotTrend[2][1]}}</strong> tweets. On {{plotTrend[2][2]}}, the hottest tweet gained {{plotTrend[2][3]}} likes.</p></div>
+                    <div id="plotly-trends" class="plotly-analysis col-lg-8 col-md-12">
+                        <script>
+                            var graph = {{ plotTrend[0] | safe }};
+                            var layout = {
+                                            title : 'The trend of the number of tweets ({{intro[2]}} to {{intro[3]}})',
+                                            tracetoggle: true,
+                                            yaxis: {showgrid: false,
+                                                    automargin: true,
+                                                    title: "# of Tweets"},
+                                            xaxis: {automargin: true,
+                                                    showgrid: false,
+                                                    title: "Date",
+                                                    "tickformat": "%b %d\n%Y",
+                                                    // "ticklabelmode": "period",
+                                                    }
+                                        };
+                            var config = {
+                                            displayModeBar: false, 
+                                            displaylogo: false,
+                                            responsive: true
+                                        };
+                            Plotly.newPlot('plotly-trends', graph, layout, config);
+                        </script>
+                    </div>
+                    <div id="plotly-trends2" class="plotly-analysis col-lg-8 col-md-12">
+                        <script>
+                            var graph = {{ plotTrend[1] | safe }};
+                            var layout = {
+                                            title : 'The trend of the number of likes ({{intro[2]}} to {{intro[3]}})',
+                                            tracetoggle: true,
+                                            yaxis: {showgrid: false,
+                                                    automargin: true,
+                                                    title: "# of Likes"},
+                                            xaxis: {automargin: true,
+                                                    showgrid: false,
+                                                    title: "Date",
+                                                    "tickformat": "%b %d\n%Y",
+                                                    },
+                                            updatemenus: [
+                                                {
+                                                buttons: [
+                                                        {
+                                                            args: [{"visible": [true, false]}],
+                                                            label: 'Average likes of tweets',
+                                                            method: 'update'
+                                                        },
+                                                        {
+                                                            args: [{"visible": [false, true]}],
+                                                            label:'Max likes of tweets',
+                                                            method:'update'
+                                                        },
+                                                    ],
+                                                    direction: "right",
+                                                    x: 1,
+                                                    y: 1.2,
+                                                    showactive: true,
+                                                    type: "buttons",
+                                                },
+                                            ]
+                                        };
+                            var config = {
+                                            displayModeBar: false, 
+                                            displaylogo: false,
+                                            responsive: true
+                                        };
+                            Plotly.newPlot('plotly-trends2', graph, layout, config);
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Output3: hashtag -->
+        <section id="popular-hashtag">
+            <a href="#hashtagDiv" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="hashtagDiv" class="text-decoration-none">
+                <div class="subtitle"><span class="step-guide"> Ⅲ. Choose the right hashtag for your own tweets</span><i class="fas fa-chevron-down fa-2x"></i></div>
+            </a>
+            <div id="hashtagDiv" class="card card-body collapse">
+                <div class="advice">
+                    <p style="display:inline"><u>The right hashtags can increase your engagement and chances of being seen.</u> The most related hashtags to the topic #{{intro[1]}} from {{intro[2]}} to {{intro[3]}} are 
+                        {% for i in range(5) %}
+                            <p class="list-p" style="display:inline-block"><strong>#{{plotHashtag[1][i]}}</strong> ({{plotHashtag[2][i]}} times/{{intro[0]}} tweets)</p>
+                        {% endfor %}
+                    </p>
+                    <span class="notation"><em>Note: One tweet might have multiple hashtags and mention one hashtag for multiple times. Thus, the number of hashtags is supposed to be great than the number of tweets.</em></span>
+                </div>
+                <div class="container-fluid row">
+                    <div id="plotly-hashtag" class="plotly-analysis col-lg-8 col-md-12">
+                        <script>
+                            var graph = {{ plotHashtag[0] | safe }};
+                            var layout = {
+                                            title : 'Top 10 Hashtags ({{intro[2]}} to {{intro[3]}})',
+                                            tracetoggle: true,
+                                            yaxis: {showgrid: false,
+                                                    automargin: true,
+                                                    title: "Counts"},
+                                            xaxis: {automargin: true,
+                                                    showgrid: false,
+                                                    title: "Hashtags"}
+                                        };
+                            var config = {
+                                            displayModeBar: false, 
+                                            displaylogo: false,
+                                            responsive: true
+                                        };
+                            Plotly.newPlot('plotly-hashtag', graph, layout, config);
+                        </script>
+                    </div>
+                    <div id="plotly-bar-chart-race" class="plotly-analysis col-lg-8 col-md-12">
+                        <script>
+                            var graph = {{ plotBarRace | safe }};
+                            var layout = {
+                                            title : 'Dynamic Change of Hashtags from {{intro[2]}} to {{intro[3]}}',
+                                            tracetoggle: true,
+                                            yaxis: {showgrid: false,
+                                                    automargin: true,
+                                                    title: "Hashtags"},
+                                            xaxis: {automargin: true,
+                                                    showgrid: false,
+                                                    title: "Counts"}
+                                        };
+                            var config = {
+                                            displayModeBar: false, 
+                                            displaylogo: false,
+                                            responsive: true
+                                        };
+                            Plotly.plot('plotly-bar-chart-race', graph, layout, config);
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Output4: keywords & emojis -->
+        <section  id="popular-content">   
+            <a href="#wordingDiv" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="wordingDiv" class="text-decoration-none">
+                <div class="subtitle"><span class="step-guide"> Ⅳ. Enhance your posts with trending keywords and emojis</span><i class="fas fa-chevron-down fa-2x"></i></div>
+            </a> 
+            <div id="wordingDiv" class="card card-body collapse">
+                <div class="advice">
+                    <p style="display:inline"> Words that are used the most are (top 10):   
+                        {% for i in range(10) %}
+                                <p class="list-p" style="display:inline-block"><strong>{{plotWordCloud[1][i]}}</strong></p>
+                        {% endfor %}
+                    </p>
+                    <p style="display:inline"> Emoji that are used the most are (top 15):   
+                        {% for i in range(15) %}
+                            <p class="list-p" style="display:inline-block"><strong>{{plotEmoji[1][i]}}</strong></p>
+                        {% endfor %}
+                    </p>
+                    <span class="notation"><em>Note: The wordcloud is plotted based on top 30% liked tweets.</em></span>
+                </div>
+                <div class="container-fluid row">
+                    <div id="plotly-wc" class="plotly-analysis col-lg-6 col-md-12">
+                        <h4 class="graph-title">Wordcloud of the Top 10% Most Liked Tweets</h4>
+                        <img src="{{ url_for('static', filename=plotWordCloud[0]) }}" alt="" width="100%">
+                    </div>
+                    <div id="plotly-emoji" class="plotly-analysis col-lg-6 col-md-12">
+                        <h4 class="graph-title">Top Emojis</h4>
+                        {% for i in plotEmoji[1][:10] %}
+                            <div class="emoji-div" style="display:inline">{{i}}</div>
+                        {% endfor %}
+                        {% for i in plotEmoji[1][10:] %}
+                            <div class="emoji-div emoji-div-2" style="display:inline">{{i}}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Output5: links -->
+        <section id="popular-link">
+            <a href="#linkDiv" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="linkDiv" class="text-decoration-none">
+                <div class="subtitle"><span class="step-guide"> Ⅴ. Find web references for your posts</span><i class="fas fa-chevron-down fa-2x"></i></div>
+            </a> 
+            <div id="linkDiv" class="card card-body collapse">
+                <div class="advice">
+                    <p>
+                        {% for i in plotDomain[1][:3] %}
+                            <p class="list-p" style="display:inline"><strong>{{i}}</strong></p>
+                        {% endfor %}
+                        are the top domains (media) that Twitter users link to. Please check the most mentioned articles/video/posts on the bottom!
+                    </p>
+                </div>
+                <div class="container-fluid row">
+                    <div id="plotly-domain" class="plotly-analysis col-lg-8 col-md-12">
+                        <script>
+                            var graph = {{ plotDomain[0] | safe }}; 
+                            var layout = {
+                                        title : 'Top 10 Url Domain Referenced ({{intro[2]}} - {{intro[3]}})',
+                                        tracetoggle: true,
+                                        yaxis: {showgrid: false,
+                                                automargin: true},
+                                        xaxis: {automargin: true,
+                                                showgrid: false,
+                                                title: "Reference Times"}
+                                        };
+                            var config = {
+                                            displayModeBar: false, 
+                                            displaylogo: false,
+                                            responsive: true
+                                        };
+                            Plotly.plot('plotly-domain', graph, layout, config);
+                        </script>
+                    </div>
+                    <div id="plotly-url" class="plotly-analysis col-lg-8 col-md-12">
+                        <h4 class="graph-title">Top Urls Embeded</h4>
+                        {% for i in range(10) %}
+                            <tr>
+                                <td>Top {{i+1}}: </td>
+                                <td><a href="{{plotUrl[1][i]}}" class="link">{{plotUrl[1][i][:100]}}...</a></td>
+                            </tr>
+                            <br>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Output6: users -->
+        <section id="popular-users">
+            <a href="#userDiv" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="userDiv" class="text-decoration-none">
+                <div class="subtitle"><span class="step-guide"> Ⅵ. Connect/tag with other Twitter accounts</span><i class="fas fa-chevron-down fa-2x"></i></div>
+            </a>
+            <div id="userDiv" class="card card-body collapse">
+                <div class="advice">
+                    <p>
+                        {% for i in plotMention[1][:5] %}
+                            <p class="list-p" style="display:inline"><strong>@{{i}}</strong></p>
+                        {% endfor %}
+                        are the most mentioned users on Twitter.
+                    </p>
+                </div>
+                <div class="container-fluid row">
+                    <div id="plotly-userm" class="plotly-analysis col-lg-8 col-md-12">
+                        <script>
+                            var graph = {{ plotMention[0] | safe }};
+                            var layout = {
+                                        title : 'Top 10 Users Mentioned ({{intro[2]}} to {{intro[3]}})',
+                                        tracetoggle: true,
+                                        yaxis: {showgrid: false,
+                                                automargin: true},
+                                        xaxis: {automargin: true,
+                                                showgrid: false,
+                                                title: "Mention Times"}
+                                        };
+                            var config = {
+                                            displayModeBar: false, 
+                                            displaylogo: false,
+                                            responsive: true
+                                        };
+                            Plotly.plot('plotly-userm', graph, layout, config);
+                        </script>
+                    </div>
+                </div>  
+                <span>Check out more analysis on influencers around this topic <a href="/dashboard/influencer-analysis"> here!</a></span>
+            </div>
+        </section>
+
+
+
+        <section class="foot-section">
+            <a href="#" class="step2-trigger"><i class="fas fa-arrow-left fa-3x"></i></a>
+        </section>
+    </div>
+
+
+    <!-- javascript -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/trend-analysis.js') }}"></script>
+    <script>
+        document.getElementById("step1-btn").click();
+    </script>
+    {% if input_values[4] %}
+    <script>
+        document.getElementById("step2-btn").click();
+    </script>
+    {% endif %}
+    {% endblock %}
+</body>
+</body>
+</html>

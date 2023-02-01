@@ -1,0 +1,228 @@
+html, body {
+  height: 100vh;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 1rem;
+}
+
+h1 {
+  font-size: 2rem;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: bold;
+  margin: 3rem;
+  text-align: center;
+}
+
+
+/*
+ * Sidebar
+ */
+
+.greetings {
+  padding: 4px 16px 8px 16px;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  /* rtl:raw:
+  right: 0;
+  */
+  bottom: 0;
+  /* rtl:remove */
+  left: 0;
+  z-index: 100; /* Behind the navbar */
+  padding: 48px 0 0; /* Height of navbar */
+  box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.11);
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    top: 5rem;
+  }
+}
+
+.sidebar-sticky {
+  position: relative;
+  top: 0;
+  height: calc(100vh - 48px);
+  padding-top: .5rem;
+  overflow-x: hidden;
+  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+}
+
+.sidebar .nav-link {
+  font-weight: 500;
+  color: #333;
+}
+
+.sidebar li:hover {
+  background-color: #E5E5E5; 
+}
+
+.sidebar-heading {
+  font-size: .75rem;
+  text-transform: uppercase;
+}
+
+/*
+ * Navbar
+ */
+
+.navbar-nav{
+  color: white;
+}
+
+.navbar-brand {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: 1rem;
+  background-color: rgba(0, 0, 0, .25);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+}
+
+.navbar .navbar-toggler {
+  top: .25rem;
+  right: 1rem;
+}
+
+.user-profile {
+  background-color: #E6E6E4;;
+  border-radius: 50%;
+  padding: 4px;
+}
+
+.top-nav {
+  list-style: none;
+  padding-left: 0;
+  display: inline-block;
+  margin: 0 20px 0 0; 
+}
+
+.top-nav > li {
+  display: inline-block;
+  position: relative; }
+
+.navbar-nav .dropdown-menu {
+  position: absolute;
+  top: 110%;
+  left: -60%
+}
+
+.settings-menu li {
+  padding: 7px 20px; 
+}
+.settings-menu li:hover {
+  background-color: #E5E5E5; 
+}
+.settings-menu li a {
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: capitalize;
+  color: #666;
+  text-decoration: none;
+  -webkit-transition: all ease-in 0.3s;
+  -moz-transition: all ease-in 0.3s;
+  -ms-transition: all ease-in 0.3s;
+  transition: all ease-in 0.3s; 
+}
+.settings-menu li a:hover {
+  color: #39444e; 
+}
+.settings-menu li a i {
+  margin-right: 6px; 
+}
+  
+
+/* 
+button
+ */
+
+.btn {
+  background-color: #00aced;
+}
+
+
+/* 
+Style the tab
+ */
+
+.tab {
+  overflow: hidden;
+  border-bottom: 1px solid #ccc;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: #c0deed;
+  opacity: 0.7;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 8px 16px;
+  transition: 0.3s;
+  margin: 0 0.1%;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #00aced;
+  color: white;
+  opacity: 1;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #00aced;
+  color: white;
+  opacity: 1;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+  background: #F6F6F6;
+}
+
+/* Fade */
+.tabcontent {
+  animation: fadeEffect 0.5s; /* Fading effect takes 0.5 second */
+}
+
+/* Go from zero to full opacity */
+@keyframes fadeEffect {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+
+
+
+/* 
+arrow
+ */
+
+ .foot-section {
+   margin-top: 5%;
+ }
+
+.fa-arrow-left {
+  color:#DBE2EF;
+}
+
+.fa-arrow-right {
+  float: right;
+  color:#DBE2EF;
+}

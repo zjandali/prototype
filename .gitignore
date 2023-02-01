@@ -1,0 +1,7 @@
+/__pycache__
+flask_session
+apikeys.txt
+static/wordcloud/
+.ipynb_checkpoints
+collector.txt
+.DS_Store

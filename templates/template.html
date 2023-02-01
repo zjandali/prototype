@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat&family=Ubuntu&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="{{ url_for('static', filename='fontawesome/css/fontawesome.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='fontawesome/css/brands.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='fontawesome/css/solid.css') }}" rel="stylesheet">
+
+    <!-- Bootsrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+
+    <!-- css -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}">
+
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow fixed-top">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="/dashboard">The Activism Always Product</a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="navbar-nav px-3 top-nav">
+          <li class="dropdown">
+            <span><img src="{{ url_for('static', filename='pics/avatar.png') }}" style="width:30px;" alt="User Image" class="user-profile"></span>
+            <span> {{ firstname }} <b>{{ lastname }}</b></span>
+            <a href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle" style="color: white;">
+            </a>
+            <ul class="dropdown-menu settings-menu">
+               <!-- <li><a href="#"><i class="fas fa-cogs"></i> Settings</a></li> -->
+               <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
+               <li><a href="#"><i class="fas fa-file-pdf"></i> Reports</a></li>
+               <hr>
+               <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+          </li>
+        </div>
+    </header>
+      
+    <!-- Side Bar -->
+    <div class="container-fluid">
+      <div class="row">
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+          <div class="position-sticky pt-3">
+
+            <p class="greetings">Hello, {{ firstname }}!</p>
+            
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Twitter</span>
+            </h6>
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="/dashboard/trend-analysis">
+                  <i class="fas fa-poll"></i>
+                  Trend Analysis
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/dashboard/influencer-analysis">
+                  <i class="fas fa-user"></i>
+                  Influencer Analysis
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/dashboard/benchmark-analysis">
+                  <i class="fas fa-chart-area"></i>
+                  Benchmark Analysis
+                </a>
+              </li>
+            </ul>
+
+
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Google Trend</span>
+            </h6>
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="/dashboard/google-index">
+                  <i class="fas fa-poll"></i>
+                  Google Index
+                </a>
+              </li>
+            </ul>
+
+
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Documentations</span>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item">
+                <a class="nav-link" href="/dashboard/guidance">
+                  <i class="fas fa-file-word"></i>
+                  User Handbook
+                </a>
+              </li>
+            </ul>
+
+
+          </div>
+        </nav>
+    
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1>{{ route }}</h1>
+          </div>
+          {% block content %}
+          {% endblock %}
+        </main>
+      </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js" integrity="sha384-KsvD1yqQ1/1+IA7gi3P0tyJcT3vR+NdBTt13hSJ2lnve8agRGXTTyNaBYmCR/Nwi" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.min.js" integrity="sha384-nsg8ua9HAw1y0W1btsyWgBklPnCUAFLuTMS2G72MMONqmOymq585AcH49TLBQObG" crossorigin="anonymous"></script> 
+    
+</body>
+</html>
+
+
